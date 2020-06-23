@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/jumale/alfred-go/pkg/k8s"
-	"github.com/jumale/alfred-go/pkg/k8s/cli"
+	"github.com/jumale/alfred-go/pkg/k8s/kubectl"
 	"github.com/spf13/cobra"
 	"os"
 	"text/template"
@@ -27,10 +27,12 @@ func newK8sCommand(cfg k8s.Config) *cobra.Command {
 		cfg.ContextOrder = k8s.DefaultOrder
 	}
 
-	podBashCmd := cli.CmdPodExec("{{.Pod}}", "{{.Container}}", "-it", "bash")
+	podBashCmd := kubectl.CmdPodExec("{{.Pod}}", "{{.Container}}", "-it", "bash")
 	podBashTpl := template.Must(template.New("pod_exec").Parse(podBashCmd))
 
-	k8sClient := &cli.Client{BinPath: cfg.BinPath}
+	k8sClient := kubectl.NewClient(kubectl.Config{
+		BinPath: cfg.BinPath,
+	})
 	pods := &k8s.PodsFilter{Client: k8sClient, Config: cfg}
 	//contexts := &k8s.ContextsFilter{Client: k8sClient, Config: cfg}
 	//namespaces := &k8s.NamespacesFilter{Client: k8sClient, Config: cfg}

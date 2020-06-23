@@ -1,4 +1,4 @@
-package cli
+package kubectl
 
 import (
 	"os/exec"
@@ -6,11 +6,23 @@ import (
 )
 
 type Client struct {
+	cfg Config
+}
+
+type Config struct {
 	BinPath string
 }
 
+func NewClient(cfg Config) *Client {
+	if cfg.BinPath == "" {
+		cfg.BinPath = "kubectl"
+	}
+
+	return &Client{cfg: cfg}
+}
+
 func (c *Client) exec(args string) (string, error) {
-	out, err := exec.Command(c.BinPath, strings.Fields(args)...).Output()
+	out, err := exec.Command(c.cfg.BinPath, strings.Fields(args)...).Output()
 	return string(out), err
 }
 
@@ -33,7 +45,7 @@ func (c *Client) GetCurrentNamespace() (string, error) {
 }
 
 func (c *Client) SetCurrentNamespace(name string) error {
-	_, err := c.exec(CmdSetCurrentNamespace(c.BinPath, name))
+	_, err := c.exec(CmdSetCurrentNamespace(c.cfg.BinPath, name))
 	return err
 }
 
